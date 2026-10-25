@@ -12,6 +12,7 @@
   <a href="https://github.com/lazankit/oranix/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/lazankit/oranix/total?color=FF7A00"></a>
   <img alt="Windows | Linux | Android | Chrome" src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android%20%7C%20Chrome-1F1F1F">
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-1F1F1F"></a>
+  <a href="https://github.com/lazankit/oranix/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/lazankit/oranix?style=flat&color=FF7A00"></a>
 </p>
 
 <p align="center">
@@ -23,9 +24,6 @@
 </p>
 
 Most video sites ship their own controls — different on every site, mouse-only, often cluttered with ads. Oranix replaces them with one consistent, keyboard- and gesture-friendly bar: the same keys, the same subtitle and speed menus, the same swipe gestures, wherever the video is.
-
-It's a small personal project, built in the open.
-
 <p align="center"><img src="docs/oranix-player.png" width="820" alt="The Oranix player bar with the playback speed menu open"></p>
 <p align="center"><sub><i>Big Buck Bunny</i> © Blender Foundation, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></sub></p>
 
@@ -37,8 +35,7 @@ It's a small personal project, built in the open.
 | **Oranix Web** | Small video-first browser with the same bar, a pop-up/redirect shield and a start page | WebView2 (Windows), Android WebView |
 | **Oranix Player** | Video player for files on your PC | [libmpv](https://mpv.io) for playback and [uosc](https://github.com/tomasklaen/uosc) for the control bar, plus Oranix's own window, popups, gestures and theme |
 
-**What's original here:** the web player bar (`web/oranix-player.js` — inline skin, frame-aware video detector, smart next-episode, gestures), the browser shells, and Oranix Player's window, popups (`track-popup.lua`), gestures (`scroll-zones.lua`), dock and live reload.
-**What isn't:** decoding and rendering are mpv's, and Oranix Player's timeline/buttons are uosc's, configured and themed. Credit where it's due — see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Oranix Player is built with [mpv](https://mpv.io) and [uosc](https://github.com/tomasklaen/uosc) — see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Quick start
 
@@ -60,7 +57,7 @@ All downloads are on the **[latest release](https://github.com/lazankit/oranix/r
 - **Brightness tuned for OLED** — dims mid-tones so blacks stay black.
 - Double-click the title bar to maximize, the video to go fullscreen. Remembers where you stopped.
 - **Live editing (Windows):** change anything in its `config` folder and the open player restarts at the same second with the change.
-- **Windows:** a real app — its own window, bundled libmpv (x64 + ARM64), nothing else to install.
+- **Windows:** self-contained — libmpv (x64 + ARM64) is included, nothing else to install.
 - **Linux:** not a separate app (yet) — `install.sh` sets up the same theme, popups, keys and gestures on your distro's mpv.
 
 ### Oranix Web and Oranix for Chrome
