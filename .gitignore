@@ -11,3 +11,6 @@ android/out/
 web/sdk/
 
 *.log
+
+# Local release staging
+release/
