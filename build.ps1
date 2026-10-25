@@ -9,11 +9,24 @@ $dist = Join-Path $src 'dist'
 $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 $common = '/nologo', '/codepage:65001', '/target:winexe', '/platform:anycpu', '/optimize+'
 
-# Oranix Player: launcher + mpv config
+# Oranix Player: the app + bundled libmpv (x64 and ARM64) + its config (uosc, Oranix scripts, fonts).
+# libmpv comes from shinchiro/mpv-winbuild-cmake (pinned build, downloaded on first build).
+$mpvBuild = '20261007'; $mpvGit = 'eb0ee10315'
+foreach ($a in @(@('x64', 'x86_64'), @('arm64', 'aarch64'))) {
+  $dir = "$src\player\libmpv\$($a[0])"
+  if (Test-Path "$dir\libmpv-2.dll") { continue }
+  New-Item -ItemType Directory -Force $dir | Out-Null
+  $archive = "$env:TEMP\mpv-dev-$($a[1]).7z"
+  Invoke-WebRequest "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/$mpvBuild/mpv-dev-$($a[1])-$mpvBuild-git-$mpvGit.7z" -OutFile $archive -UseBasicParsing
+  tar -xf $archive -C $dir libmpv-2.dll   # Windows' tar reads .7z
+}
 $p = "$dist\Player"
-New-Item -ItemType Directory -Force $p | Out-Null
+Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force "$p\libmpv\x64", "$p\libmpv\arm64" | Out-Null
 robocopy "$src\player\config" "$p\config" /MIR /NFL /NDL /NJH /NJS | Out-Null
-Copy-Item "$src\player\launcher\oranix-player.ico" $p
+Copy-Item "$src\player\libmpv\x64\libmpv-2.dll" "$p\libmpv\x64"
+Copy-Item "$src\player\libmpv\arm64\libmpv-2.dll" "$p\libmpv\arm64"
+Copy-Item "$src\player\launcher\oranix-player.ico", "$src\player\LICENSE.libmpv.GPL" $p
 & $csc @common "/win32icon:$src\player\launcher\oranix-player.ico" "/out:$p\Oranix Player.exe" `
   /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:System.Web.Extensions.dll "$src\player\launcher\OranixPlayer.cs"
 if ($LASTEXITCODE) { throw 'Oranix Player build failed' }

@@ -17,3 +17,6 @@ release/
 
 chrome/out/
 linux/out/
+
+# libmpv (downloaded at build time, ~100 MB per CPU)
+player/libmpv/

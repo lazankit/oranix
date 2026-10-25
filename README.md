@@ -1,58 +1,58 @@
 <p align="center">
-  <img src="docs/oranix-player-icon.png" width="96" alt="Oranix Player icon">
+  <img src="docs/oranix-web-icon.png" width="88" alt="Oranix Web icon">
   &nbsp;&nbsp;
-  <img src="docs/oranix-web-icon.png" width="96" alt="Oranix Web icon">
+  <img src="docs/oranix-player-icon.png" width="88" alt="Oranix Player icon">
 </p>
 
 <h1 align="center">Oranix</h1>
-<p align="center"><b>Play More. Worry Less.</b><br>
-A clean, fast video player and a video-first web browser — for Windows (x64 &amp; ARM), Linux, Android and Chrome.</p>
+<p align="center"><b>One clean player bar for every video — on websites and on your own files.</b></p>
 
 <p align="center">
   <a href="https://github.com/lazankit/oranix/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/lazankit/oranix?color=FF7A00&label=release"></a>
   <a href="https://github.com/lazankit/oranix/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/lazankit/oranix/total?color=FF7A00"></a>
   <img alt="Windows | Linux | Android | Chrome" src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android%20%7C%20Chrome-1F1F1F">
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-1F1F1F"></a>
-  <a href="https://github.com/lazankit/oranix/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/lazankit/oranix?style=flat&color=FF7A00"></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/lazankit/oranix/releases/latest"><b>⬇ Download</b></a> ·
-  <a href="#quick-start">Quick start</a> ·
+  <a href="#whats-in-the-box">What's in the box</a> ·
   <a href="#features">Features</a> ·
   <a href="#build-it-yourself">Build</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
-<p align="center"><img src="docs/oranix-player.png" width="820" alt="Oranix Player playing Big Buck Bunny with the playback speed popup open"></p>
-<p align="center"><sub>Oranix Player · <i>Big Buck Bunny</i> © Blender Foundation, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></sub></p>
+Most video sites ship their own controls — different on every site, mouse-only, often cluttered with ads. Oranix replaces them with one consistent, keyboard- and gesture-friendly bar: the same keys, the same subtitle and speed menus, the same swipe gestures, wherever the video is.
+
+It's a small personal project, built in the open.
+
+<p align="center"><img src="docs/oranix-player.png" width="820" alt="The Oranix player bar with the playback speed menu open"></p>
+<p align="center"><sub><i>Big Buck Bunny</i> © Blender Foundation, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></sub></p>
+
+## What's in the box
+
+| | What it is | Built on |
+|---|---|---|
+| **Oranix for Chrome** | Browser extension: the Oranix bar on web videos + an ad/tracker blocklist | `oranix-player.js` (Oranix's own) — Chrome, Edge, Brave, Vivaldi, Opera |
+| **Oranix Web** | Small video-first browser with the same bar, a pop-up/redirect shield and a start page | WebView2 (Windows), Android WebView |
+| **Oranix Player** | Video player for files on your PC | [libmpv](https://mpv.io) for playback and [uosc](https://github.com/tomasklaen/uosc) for the control bar, plus Oranix's own window, popups, gestures and theme |
+
+**What's original here:** the web player bar (`web/oranix-player.js` — inline skin, frame-aware video detector, smart next-episode, gestures), the browser shells, and Oranix Player's window, popups (`track-popup.lua`), gestures (`scroll-zones.lua`), dock and live reload.
+**What isn't:** decoding and rendering are mpv's, and Oranix Player's timeline/buttons are uosc's, configured and themed. Credit where it's due — see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Quick start
 
 | | |
 |---|---|
-| **Windows** (x64 &amp; ARM64) | Download **[`OranixSetup.exe`](https://github.com/lazankit/oranix/releases/latest)** → run it → open *Oranix Player* or *Oranix Web* from the Start menu. |
-| **Linux** (any CPU) | Install mpv, download **[`oranix-player-linux.tar.gz`](https://github.com/lazankit/oranix/releases/latest)**, then `tar xzf oranix-player-linux.tar.gz && bash oranix-player/install.sh` |
-| **Android** (all phones) | Download **[`OranixWeb.apk`](https://github.com/lazankit/oranix/releases/latest)** on your phone → open it → allow "install unknown apps" once. |
-| **Chrome / Edge / Brave** (Windows, macOS, Linux, ChromeOS) | Download **[`oranix-chrome.zip`](https://github.com/lazankit/oranix/releases/latest)** → unzip → open `chrome://extensions` → turn on *Developer mode* → *Load unpacked* → pick the folder. |
+| **Chrome / Edge / Brave** (Windows, macOS, Linux, ChromeOS) | Download **`oranix-chrome.zip`** → unzip → `chrome://extensions` → **Developer mode** → **Load unpacked** → pick the folder. |
+| **Windows** (x64 & ARM64) | Download **`OranixSetup.exe`** → run it → open *Oranix Player* or *Oranix Web*. Everything is included — no separate mpv install. |
+| **Android** (all phones) | Download **`OranixWeb.apk`** on your phone → open it → allow "install unknown apps" once. |
+| **Linux** (any CPU) | Install mpv, download **`oranix-player-linux.tar.gz`** → `tar xzf oranix-player-linux.tar.gz && bash oranix-player/install.sh` |
 
-No account, no telemetry, no ads.
-
----
-
-Oranix is two small apps with one look:
-
-| | **Oranix Player** | **Oranix Web** |
-|---|---|---|
-| For | Video files on your PC | Video on websites |
-| Built on | [mpv](https://mpv.io) + [uosc](https://github.com/tomasklaen/uosc), with an Oranix skin, popups and gestures | Microsoft WebView2 (Windows) / Android WebView / your browser (extension) |
-| Platforms | Windows (x64, ARM64), Linux | Windows (x64, ARM64), Android, Chrome extension |
-
-<p align="center"><img src="docs/oranix-web-start.png" width="760" alt="Oranix Web start page"></p>
-
+All downloads are on the **[latest release](https://github.com/lazankit/oranix/releases/latest)**. No account, no telemetry.
 ## Features
 
-### Oranix Player (Windows, Linux)
+### Oranix Player (Windows; Linux as an mpv setup)
 - **Clay + glass look** in Oranix orange and charcoal, Poppins type, its own start screen.
 - **Audio & Subtitles popup** — English listed first, one click to switch. **C** turns subtitles on/off (remembers your pick).
 - **Quality & speed popup**, **−10 s / +10 s**, previous/next episode, time remaining always visible.
@@ -60,9 +60,10 @@ Oranix is two small apps with one look:
 - **Brightness tuned for OLED** — dims mid-tones so blacks stay black.
 - Double-click the title bar to maximize, the video to go fullscreen. Remembers where you stopped.
 - **Live editing (Windows):** change anything in its `config` folder and the open player restarts at the same second with the change.
-- **Linux:** the same look, popups, keys and gestures on top of your distro's mpv.
+- **Windows:** a real app — its own window, bundled libmpv (x64 + ARM64), nothing else to install.
+- **Linux:** not a separate app (yet) — `install.sh` sets up the same theme, popups, keys and gestures on your distro's mpv.
 
-### Oranix Web (Windows, Android, Chrome extension)
+### Oranix Web and Oranix for Chrome
 - **The Oranix player bar on any web video** (YouTube and most sites), right where the video sits on the page — or open it in the full Oranix window.
 - **Ad shield:** blocks ad and tracking networks, pop-ups, pop-unders, redirect hijacks and fake overlays; strips YouTube's ad schedule and auto-skips any ad that slips through.
 - **Smart next/previous:** finds playlists, "next episode" buttons and next-page links; Netflix-style *Up next* card.
@@ -75,7 +76,7 @@ Oranix is two small apps with one look:
 
 Download from the **[latest release](https://github.com/lazankit/oranix/releases/latest)**:
 
-- **Windows 10/11, x64 or ARM64:** `OranixSetup.exe` — one installer for both kinds of PC (the apps run natively on Snapdragon/Windows-on-ARM laptops). Installs Oranix Player and Oranix Web for your user (no admin needed), adds Start menu entries and an uninstaller. Oranix Player uses mpv; if it isn't installed, Oranix Player offers to install it (`winget install shinchiro.mpv`).
+- **Windows 10/11, x64 or ARM64:** `OranixSetup.exe` — one installer for both kinds of PC (the apps run natively on Snapdragon/Windows-on-ARM laptops). Installs Oranix Player (with libmpv bundled) and Oranix Web for your user (no admin needed), adds Start menu entries and an uninstaller.
 - **Linux (x86_64, ARM64, …):** `oranix-player-linux.tar.gz` — Oranix Player on top of your distro's mpv. Install mpv (`sudo apt install mpv`, `dnf`, `pacman` or Flatpak), then run `bash install.sh` from the unpacked folder. Adds an app-menu entry and an `oranix-player` command; `bash uninstall.sh` removes it.
 - **Android 8+, every phone and tablet:** `OranixWeb.apk` — copy to your phone and open it (allow "install unknown apps" once).
 - **Chrome, Edge, Brave, Vivaldi, Opera** (Windows, macOS, Linux, ChromeOS): `oranix-chrome.zip` — *Oranix for Chrome* puts the Oranix player bar on web videos and blocks ad and tracker networks in your normal browser. Unzip, open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and choose the folder.
@@ -133,10 +134,9 @@ Oranix-src/
 .\live.ps1   # Oranix Web reloads the page; Oranix Player restarts at the same second
 ```
 
-## Good to know
+## Privacy
 
-- Oranix Web's ad shield is for your own browsing. Please respect the sites you visit and the creators who depend on them.
-- Oranix doesn't collect anything. Saved sites and history stay on your device.
+Oranix doesn't collect anything. Saved sites and history stay on your device.
 
 ## Contributing
 
