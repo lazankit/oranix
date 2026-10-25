@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Play mark centred in the 66dp safe zone of the 108dp adaptive-icon canvas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FF7A00" android:strokeColor="#FF7A00" android:strokeWidth="8"
+        android:strokeLineJoin="round" android:pathData="M41,35 L76,54 L41,73 Z" />
+    <path android:fillColor="#FFD7B3" android:pathData="M46,45.5 L61,54 L46,62.5 Z" />
+</vector>

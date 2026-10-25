@@ -1,0 +1,13 @@
+# Build output (published as GitHub Release assets instead)
+dist/
+installer/Output/
+android/out/
+
+# Android signing key - private, never publish
+*.jks
+*.keystore
+
+# Downloaded at build time (Microsoft WebView2 SDK)
+web/sdk/
+
+*.log

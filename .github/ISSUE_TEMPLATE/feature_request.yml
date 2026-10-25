@@ -1,0 +1,21 @@
+name: Feature idea
+description: Suggest something that would make Oranix better
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: app
+    attributes:
+      label: Which app?
+      options: [Oranix Player, Oranix Web (Windows), Oranix Web (Android), All of them]
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to do that you can't today?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How do you picture it working?

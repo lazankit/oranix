@@ -1,0 +1,35 @@
+name: Bug report
+description: Something in Oranix doesn't work the way it should
+labels: [bug]
+body:
+  - type: dropdown
+    id: app
+    attributes:
+      label: Which app?
+      options: [Oranix Player (Windows), Oranix Web (Windows), Oranix Web (Android), Installer]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+      placeholder: "I pressed C on a video with English subtitles and…"
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Website or file type (if relevant)
+      placeholder: "youtube.com, an .mkv file (x265), …"
+  - type: input
+    id: version
+    attributes:
+      label: Oranix version and OS / phone
+      placeholder: "1.0.0, Windows 11 / Nothing Phone 3, Android 15"
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or anything else

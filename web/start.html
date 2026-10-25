@@ -1,0 +1,40 @@
+<!-- Oranix Web start page. Live: edits here show up as soon as the file is saved.
+     {{TILES}} saved sites, {{ROWS}} history, {{CLEAR}} the Clear link (filled in by the app). -->
+<!doctype html><meta charset=utf-8><title>Oranix Web</title><style>
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#3a1f05,#1F1F1F 60%) fixed;color:#eee;
+font-family:Poppins,'Segoe UI Variable Text','Segoe UI',sans-serif;min-height:100vh}
+.wrap{max-width:980px;margin:0 auto;padding:64px 24px}
+.logo{display:flex;align-items:center;justify-content:center;gap:14px;font-size:46px;font-weight:700;letter-spacing:-.5px}
+.logo b{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#FFA94D,#F25C00);display:grid;place-items:center;box-shadow:0 10px 30px rgba(255,122,0,.35)}
+.logo b:after{content:'';border-left:20px solid #fff;border-top:13px solid transparent;border-bottom:13px solid transparent;margin-left:6px}
+.logo i{color:#FF7A00;font-style:normal}
+.logo em{font-style:normal;font-size:15px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#FF7A00;border:1.5px solid rgba(255,122,0,.6);border-radius:999px;padding:4px 12px;align-self:center}
+.logo b{background:#1F1F1F!important;border:1px solid #3A3A3A}.logo b:after{border-left-color:#FF7A00!important}.tag{text-align:center;color:#9a9a9a;letter-spacing:3px;font-size:12px;text-transform:uppercase;margin:8px 0 34px}
+form{display:flex;max-width:640px;margin:0 auto 46px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px;backdrop-filter:blur(10px);transition:border-color .15s}
+form:focus-within{border-color:#FF7A00}input{flex:1;background:none;border:0;color:#fff;font:inherit;font-size:16px;padding:10px 18px;outline:none}
+form button{background:#FF7A00;border:0;color:#fff;font:inherit;font-weight:600;border-radius:999px;padding:0 22px;cursor:pointer}
+h2{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#9a9a9a;display:flex;justify-content:space-between;margin:0 0 14px}
+h2 a{color:#9a9a9a;text-decoration:none;cursor:pointer}h2 a:hover{color:#FF7A00}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:44px}
+.tile{position:relative;display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#eee;text-decoration:none;transition:transform .12s,background .12s,border-color .12s}
+.tile:hover{transform:translateY(-2px);background:rgba(255,122,0,.12);border-color:rgba(255,122,0,.5)}
+.ic{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#FFA94D,#F25C00);display:grid;place-items:center;font-weight:700;margin-bottom:8px}
+.ic.sm{width:28px;height:28px;font-size:13px;margin:0;flex:none}
+.tt{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hs{font-size:12px;color:#8c8c8c}
+.list{display:flex;flex-direction:column;gap:4px}.row{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:#ddd;text-decoration:none;transition:background .12s}
+.row:hover{background:rgba(255,255,255,.07)}.rt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt small{display:block;color:#8c8c8c;font-size:12px}.ago{color:#8c8c8c;font-size:12px;flex:none}
+.x{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.4);color:#ccc;cursor:pointer;opacity:0;transition:opacity .12s}
+.row .x{position:static;opacity:0}.tile:hover .x,.row:hover .x{opacity:1}.x:hover{background:#FF7A00;color:#fff}
+.empty{color:#777;font-size:14px;padding:10px 12px}
+</style><div class=wrap>
+<div class=logo><b></b><span>Oran<i>ix</i></span><em>Web</em></div><div class=tag>Watch anything · Worry less</div>
+<form id=f><input id=q placeholder='Search or type a site' autofocus><button>Go</button></form>
+<h2>Saved sites</h2><div class=grid>{{TILES}}</div>
+<h2>Recently opened{{CLEAR}}</h2><div class=list>{{ROWS}}</div></div>
+<script>
+f.onsubmit = e => { e.preventDefault(); const t = q.value.trim(); if (!t) return;
+  location.href = /^\w+:\/\//.test(t) ? t : (/\./.test(t) && !/\s/.test(t)) ? 'https://' + t : 'https://duckduckgo.com/?q=' + encodeURIComponent(t); };
+document.addEventListener('click', e => { const m = e.target.closest('[data-m]'); if (!m) return;
+  e.preventDefault(); e.stopPropagation(); chrome.webview.postMessage(m.dataset.m); }, true);
+</script>
