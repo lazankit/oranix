@@ -1,12 +1,13 @@
 # Builds both Oranix apps into dist\ and (optionally) the installer OranixSetup.exe.
 #   .\build.ps1             -> dist\Player, dist\Web
 #   .\build.ps1 -Installer  -> also installer\Output\OranixSetup.exe
+# The apps are AnyCPU .NET Framework programs: they run natively on x64 and on Windows on ARM (ARM64).
 param([switch]$Installer)
 $ErrorActionPreference = 'Stop'
 $src = $PSScriptRoot
 $dist = Join-Path $src 'dist'
 $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
-$common = '/nologo', '/codepage:65001', '/target:winexe', '/platform:x64', '/optimize+'
+$common = '/nologo', '/codepage:65001', '/target:winexe', '/platform:anycpu', '/optimize+'
 
 # Oranix Player: launcher + mpv config
 $p = "$dist\Player"
@@ -17,18 +18,25 @@ Copy-Item "$src\player\launcher\oranix-player.ico" $p
   /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:System.Web.Extensions.dll "$src\player\launcher\OranixPlayer.cs"
 if ($LASTEXITCODE) { throw 'Oranix Player build failed' }
 
-# Oranix Web: browser + live files. The WebView2 SDK (Microsoft) is downloaded from NuGet on first build.
-if (!(Test-Path "$src\web\sdk\Microsoft.Web.WebView2.Core.dll")) {
+# Oranix Web: browser + live files. The WebView2 SDK (Microsoft) is downloaded from NuGet on first build,
+# with the native loader for both x64 and ARM64.
+$sdk = "$src\web\sdk"
+if (!(Test-Path "$sdk\runtimes\win-arm64\native\WebView2Loader.dll")) {
   $nupkg = "$env:TEMP\webview2-sdk.zip"
   Invoke-WebRequest 'https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.2903.40' -OutFile $nupkg -UseBasicParsing
   Expand-Archive $nupkg "$env:TEMP\webview2-sdk" -Force
-  New-Item -ItemType Directory -Force "$src\web\sdk" | Out-Null
-  Copy-Item "$env:TEMP\webview2-sdk\lib\net462\Microsoft.Web.WebView2.Core.dll", "$env:TEMP\webview2-sdk\lib\net462\Microsoft.Web.WebView2.WinForms.dll",
-    "$env:TEMP\webview2-sdk\runtimes\win-x64\native\WebView2Loader.dll" "$src\web\sdk"
+  Remove-Item $sdk -Recurse -Force -ErrorAction SilentlyContinue
+  New-Item -ItemType Directory -Force "$sdk\runtimes\win-x64\native", "$sdk\runtimes\win-arm64\native" | Out-Null
+  Copy-Item "$env:TEMP\webview2-sdk\lib\net462\Microsoft.Web.WebView2.Core.dll", "$env:TEMP\webview2-sdk\lib\net462\Microsoft.Web.WebView2.WinForms.dll" $sdk
+  foreach ($arch in 'x64', 'arm64') {
+    Copy-Item "$env:TEMP\webview2-sdk\runtimes\win-$arch\native\WebView2Loader.dll" "$sdk\runtimes\win-$arch\native"
+  }
 }
 $w = "$dist\Web"
+Remove-Item $w -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $w | Out-Null
-Copy-Item "$src\web\sdk\*", "$src\web\oranix-player.js", "$src\web\start.html", "$src\web\oranix-web.ico" $w
+Copy-Item "$sdk\*" $w -Recurse
+Copy-Item "$src\web\oranix-player.js", "$src\web\start.html", "$src\web\oranix-web.ico" $w
 & $csc @common "/win32icon:$src\web\oranix-web.ico" "/out:$w\Oranix Web.exe" `
   "/r:$w\Microsoft.Web.WebView2.Core.dll" "/r:$w\Microsoft.Web.WebView2.WinForms.dll" `
   /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Web.Extensions.dll "$src\web\OranixBrowse.cs"

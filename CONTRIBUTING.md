@@ -18,6 +18,8 @@ Thanks for helping! Oranix is small on purpose — a few plain files per app, no
 | Oranix Web start page | `web/start.html` |
 | Oranix Web window, toolbar, ad shield (Windows) | `web/OranixBrowse.cs` |
 | Oranix Web for Android | `android/src/com/oranix/web/MainActivity.java` |
+| Oranix for Chrome (manifest; the blocklist is built from `web/OranixBrowse.cs`) | `chrome/manifest.json`, `chrome/build.ps1` |
+| Oranix Player for Linux | `linux/install.sh` |
 | Installer | `installer/Oranix.iss` |
 
 ## Try your change
@@ -26,6 +28,8 @@ Thanks for helping! Oranix is small on purpose — a few plain files per app, no
 .\build.ps1 -Installer    # build both Windows apps + installer
 .\live.ps1                # or: push config/script/start-page edits into an installed copy instantly
 .\android\build.ps1       # Android APK
+.\chrome\build.ps1        # Chrome extension (.\chrome\test-extension.ps1 checks it on YouTube in headless Edge)
+.\linux\build.ps1         # Linux package
 ```
 
 Changes to `player/config`, `web/oranix-player.js` and `web/start.html` show up live in running apps after `.\live.ps1` — no rebuild needed.

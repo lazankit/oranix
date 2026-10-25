@@ -38,7 +38,7 @@ $g.DrawString('ix', $fBig, (New-Object System.Drawing.SolidBrush (C '#FF7A00')),
 $fTag = New-Object System.Drawing.Font $poppins, 30, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
 $g.DrawString('Play More. Worry Less.', $fTag, (New-Object System.Drawing.SolidBrush (C '#D9D9D9')), 100, 460)
 $fSub = New-Object System.Drawing.Font $poppins, 22, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
-$g.DrawString(('Video player + video-first browser  {0}  Windows & Android  {0}  Open source (MIT)' -f [char]0xB7), $fSub, (New-Object System.Drawing.SolidBrush (C '#9A9A9A')), 100, 515)
+$g.DrawString(('Windows  {0}  Linux  {0}  Android  {0}  Chrome  {0}  x64 & ARM  {0}  Open source (MIT)' -f [char]0xB7), $fSub, (New-Object System.Drawing.SolidBrush (C '#9A9A9A')), 100, 515)
 
 # Player screenshot on the right, in a rounded card with a soft shadow
 $shot = [System.Drawing.Image]::FromFile("$root\docs\oranix-player.png")

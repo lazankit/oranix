@@ -234,6 +234,10 @@ class OranixBrowse : Form
     {
         // Normal browser autoplay rules (so Next/playlists keep playing); test mode always autoplays.
         var opts = new CoreWebView2EnvironmentOptions(snapPath == null ? "" : "--autoplay-policy=no-user-gesture-required");
+        // One build for x64 and Windows on ARM: load the WebView2 loader that matches this process.
+        string arch = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "win-arm64" : "win-x64";
+        string loaderDir = Path.Combine(AppDir, "runtimes", arch, "native");
+        if (File.Exists(Path.Combine(loaderDir, "WebView2Loader.dll"))) CoreWebView2Environment.SetLoaderDllFolderPath(loaderDir);
         env = await CoreWebView2Environment.CreateAsync(null, ProfileDir, opts);
         await web.EnsureCoreWebView2Async(env);
         var cw = web.CoreWebView2;

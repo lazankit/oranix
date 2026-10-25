@@ -14,3 +14,6 @@ web/sdk/
 
 # Local release staging
 release/
+
+chrome/out/
+linux/out/
