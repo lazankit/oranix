@@ -7,7 +7,7 @@
 local ov = mp.create_osd_overlay("ass-events")
 local open, items, hover, offset = false, {}, 1, 0
 local hide_timer
-local MAX_ROWS = 8
+local MAX_ROWS = 10
 local preferred_sub   -- {lang=, title=} of the last subtitle the user picked
 
 local LANGS = { en = "English", eng = "English", hi = "Hindi", hin = "Hindi", es = "Spanish", spa = "Spanish",
@@ -50,11 +50,73 @@ local function sorted(kind)
   return list
 end
 
-local mode = "tracks"   -- "tracks" (audio + subtitles) or "speed"
+local mode = "tracks"   -- "tracks", "speed", or the subtitle tools: "online", "lang", "style"
 local SPEEDS = { 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2 }
+
+-- Subtitle tools: state comes from oranix-subs.lua, which does the searching, downloading and syncing.
+local subs = {}
+local function engine(...) mp.commandv("script-message-to", "oranix_subs", ...) end
+
+local STYLE = {
+  { "Size", "size", { { 30, "Small" }, { 38, "Medium" }, { 48, "Large" }, { 60, "Extra large" }, { 74, "Huge" } } },
+  { "Font", "font", { { "Poppins", "Poppins (Oranix)" }, { "Atkinson Hyperlegible", "Atkinson Hyperlegible · easy to read" },
+                      { "OpenDyslexic", "OpenDyslexic · dyslexia-friendly" }, { "Lexend", "Lexend · reading-friendly" },
+                      { "sans-serif", "System sans" } } },
+  { "Background", "background", { { "outline", "Outline" }, { "shadow", "Soft shadow" }, { "box", "Dark box" } } },
+  { "Colour", "color", { { "white", "White" }, { "yellow", "Yellow" }, { "peach", "Warm white" } } },
+  { "Position", "position", { { 100, "Bottom" }, { 92, "Raised" }, { 80, "Higher" } } },
+}
+
+local function build_tools()
+  local s = subs.settings or {}
+  if mode == "online" then
+    table.insert(items, { kind = "back", text = "‹ Back" })
+    table.insert(items, { header = "Online · OpenSubtitles" })
+    local lname = "English"
+    for _, l in ipairs(subs.languages or {}) do if l.code == subs.lang then lname = l.name end end
+    table.insert(items, { kind = "open-lang", text = "Language: " .. lname .. "  ›" })
+    if subs.query and subs.query ~= "" then table.insert(items, { kind = "info", text = "“" .. subs.query .. "”" }) end
+    if subs.status == "searching" then
+      table.insert(items, { kind = "info", text = "Searching…" })
+    elseif subs.status == "empty" then
+      table.insert(items, { kind = "info", text = "No subtitles found — try another language" })
+    elseif subs.status == "error" then
+      table.insert(items, { kind = "info", text = subs.message or "Search failed" })
+    end
+    if subs.results and #subs.results > 0 then
+      table.insert(items, { header = #subs.results .. " found · best first" })
+      for i, r in ipairs(subs.results) do
+        local tag = (r.exact and "★ " or "") .. (r.hi and "[SDH] " or "")
+        local dl = r.downloads >= 1000 and string.format("%.0fk", r.downloads / 1000) or tostring(r.downloads)
+        table.insert(items, { kind = "result", id = i, text = tag .. r.name, note = dl .. " ↓" })
+      end
+    end
+  elseif mode == "lang" then
+    table.insert(items, { kind = "back-online", text = "‹ Back" })
+    table.insert(items, { header = "Search language" })
+    for _, l in ipairs(subs.languages or {}) do
+      table.insert(items, { kind = "lang", id = l.code, text = l.name, active = l.code == subs.lang })
+    end
+  elseif mode == "style" then
+    table.insert(items, { kind = "back", text = "‹ Back" })
+    local delay = mp.get_property_number("sub-delay", 0)
+    table.insert(items, { header = string.format("Timing · %+.1f s", delay) })
+    table.insert(items, { kind = "delay", id = -0.1, text = "Show earlier  (−0.1 s)" })
+    table.insert(items, { kind = "delay", id = 0.1, text = "Show later  (+0.1 s)" })
+    table.insert(items, { kind = "delay", id = 0, text = "Reset timing" })
+    for _, group in ipairs(STYLE) do
+      table.insert(items, { header = group[1] })
+      for _, opt in ipairs(group[3]) do
+        table.insert(items, { kind = "style", key = group[2], id = opt[1], text = opt[2], active = s[group[2]] == opt[1] })
+      end
+    end
+    table.insert(items, { kind = "reset-style", text = "Reset style" })
+  end
+end
 
 local function build()
   items = {}
+  if mode == "online" or mode == "lang" or mode == "style" then build_tools() return end
   if mode == "speed" then
     local cur = mp.get_property_number("speed", 1)
     table.insert(items, { header = "Playback speed" })
@@ -79,6 +141,10 @@ local function build()
   end
   section("audio", "Audio")
   section("sub", "Subtitles", true)
+  table.insert(items, { header = "Subtitle tools" })
+  table.insert(items, { kind = "open-online", text = "⤓ Find subtitles online  (Ctrl+S)" })
+  table.insert(items, { kind = "sync", text = "⟲ Sync to audio  (Ctrl+Y)" })
+  table.insert(items, { kind = "open-style", text = "Aa Style & timing" })
 end
 
 -- Geometry in real screen pixels so hit-testing matches the mouse.
@@ -87,7 +153,7 @@ local function geo()
   local fs = math.floor(h * 0.021)
   local row = math.floor(fs * 1.75)
   local pad = math.floor(fs * 0.6)
-  local pw = math.floor(fs * 14)
+  local pw = math.floor(fs * ((mode == "online" or mode == "style") and 25 or 14))
   local rows = math.min(#items, MAX_ROWS)
   local ph = rows * row + pad * 2
   local x = math.floor(w - pw - h * 0.03)   -- bottom-right, under the buttons that open it
@@ -141,7 +207,15 @@ local function render()
         table.insert(out, rrect(g.x + g.pad, ry + 2, g.pw - g.pad * 2, g.row - 4, math.floor(r * 0.6), "FFFFFF", "DE", fade))
       end
       if it.active then table.insert(out, text(g.x + g.fs * 0.9, cy, g.fs, "007AFF", true, "✓", fade)) end
-      table.insert(out, text(g.x + g.fs * 2.2, cy, g.fs, it.active and "FFFFFF" or "BDBDBD", it.active, it.text, fade))
+      -- Long names (release names) are cut to fit; notes (download counts) sit on the right.
+      local room = math.floor((g.pw - g.fs * 3.2 - (it.note and g.fs * 3 or 0)) / (g.fs * 0.46))
+      local label = it.text
+      if #label > room then label = label:sub(1, room - 1):gsub("[\128-\191]*$", ""):gsub("[\192-\255]$", "") .. "…" end
+      table.insert(out, text(g.x + g.fs * 2.2, cy, g.fs, it.kind == "info" and "8C8C8C" or (it.active and "FFFFFF" or "BDBDBD"), it.active, label, fade))
+      if it.note then
+        table.insert(out, string.format("{\\an6\\pos(%d,%d)\\fnPoppins\\fs%d\\bord0\\shad0\\1c&H8C8C8C&}%s",
+          g.x + g.pw - g.fs, cy, math.floor(g.fs * 0.8), it.note))
+      end
     end
   end
   if #items > g.rows then   -- slim scrollbar
@@ -169,9 +243,26 @@ local function move(d)
   render(); bump()
 end
 
+local show
+
 local function pick(i)
   local it = items[i]
-  if not it or it.header then return end
+  if not it or it.header or it.kind == "info" then return end
+  if it.kind == "open-online" then engine("search"); show("online") return end
+  if it.kind == "open-style" then show("style") return end
+  if it.kind == "open-lang" then show("lang") return end
+  if it.kind == "back" then show("tracks") return end
+  if it.kind == "back-online" then show("online") return end
+  if it.kind == "sync" then close(); engine("sync") return end
+  if it.kind == "result" then close(); engine("download", tostring(it.id)) return end
+  if it.kind == "lang" then engine("lang", it.id); show("online") return end
+  if it.kind == "style" then engine("style", it.key, tostring(it.id)) return end   -- menu refreshes from the engine's state
+  if it.kind == "reset-style" then engine("reset-style") return end
+  if it.kind == "delay" then
+    if it.id == 0 then mp.set_property_number("sub-delay", 0) else mp.commandv("add", "sub-delay", it.id) end
+    mp.osd_message(string.format("Subtitle timing: %+.1f s", mp.get_property_number("sub-delay", 0)))
+    build(); render(); bump() return
+  end
   if it.kind == "speed" then
     mp.set_property_number("speed", it.id)
     mp.osd_message("Speed: " .. it.text)
@@ -215,13 +306,15 @@ close = function()
   render()
 end
 
-local function show(m)
+show = function(m)
   if open then close() end
   mode = m
   build()
   open, offset, hover = true, 0, 1
-  for i, it in ipairs(items) do if it.active and it.kind ~= "audio" then hover = i end end
-  if items[hover] and items[hover].header then move(1) end
+  if m == "tracks" or m == "speed" or m == "lang" then
+    for i, it in ipairs(items) do if it.active and it.kind ~= "audio" then hover = i end end
+  end
+  if items[hover] and (items[hover].header or items[hover].kind == "info") then move(1) end
   for k, fn in pairs(KEYS) do mp.add_forced_key_binding(k, "track_popup_" .. k, fn, { repeatable = true }) end
   mp.observe_property("mouse-pos", "native", on_mouse)
   render(); bump()
@@ -252,5 +345,16 @@ local function toggle(m) if open and mode == m then close() else show(m) end end
 mp.add_key_binding(nil, "toggle", function() toggle("tracks") end)
 mp.add_key_binding(nil, "speed", function() toggle("speed") end)
 mp.add_key_binding(nil, "toggle-subs", toggle_subs)
+mp.add_key_binding(nil, "online", function() if open and mode == "online" then close() else engine("search"); show("online") end end)
+mp.add_key_binding(nil, "style", function() toggle("style") end)
+mp.add_key_binding(nil, "sync", function() engine("sync") end)
+mp.observe_property("user-data/oranix-subs", "native", function(_, v)
+  subs = v or {}
+  if open and (mode == "online" or mode == "lang" or mode == "style") then
+    local keep = hover
+    build(); hover = math.min(keep, #items)
+    if items[hover] and (items[hover].header or items[hover].kind == "info") then move(1) else render(); bump() end
+  end
+end)
 mp.observe_property("osd-dimensions", "native", function() if open then render() end end)
 mp.register_event("file-loaded", function() if open then build(); render() end end)

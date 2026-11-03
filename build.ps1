@@ -20,10 +20,21 @@ foreach ($a in @(@('x64', 'x86_64'), @('arm64', 'aarch64'))) {
   Invoke-WebRequest "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/$mpvBuild/mpv-dev-$($a[1])-$mpvBuild-git-$mpvGit.7z" -OutFile $archive -UseBasicParsing
   tar -xf $archive -C $dir libmpv-2.dll   # Windows' tar reads .7z
 }
+# Subtitle sync engine: alass 2.0.0 (GPL-3.0, with its own ffmpeg), run as a separate program.
+if (!(Test-Path "$src\player\alass\bin\alass-cli.exe")) {
+  $zip = "$env:TEMP\alass-windows64.zip"
+  Invoke-WebRequest 'https://github.com/kaegi/alass/releases/download/v2.0.0/alass-windows64.zip' -OutFile $zip -UseBasicParsing
+  Remove-Item "$env:TEMP\alass-unpack" -Recurse -Force -ErrorAction SilentlyContinue
+  & "$env:WINDIR\System32\tar.exe" -xf $zip -C (New-Item -ItemType Directory -Force "$env:TEMP\alass-unpack").FullName
+  Move-Item "$env:TEMP\alass-unpack\alass-windows64" "$src\player\alass"
+  # alass finds ffmpeg/ffprobe next to itself, so the player needs no environment setup to run it.
+  Copy-Item "$src\player\alass\ffmpeg\bin\*" "$src\player\alass\bin"
+}
 $p = "$dist\Player"
 Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force "$p\libmpv\x64", "$p\libmpv\arm64" | Out-Null
 robocopy "$src\player\config" "$p\config" /MIR /NFL /NDL /NJH /NJS | Out-Null
+robocopy "$src\player\alass" "$p\alass" /E /NFL /NDL /NJH /NJS | Out-Null
 Copy-Item "$src\player\libmpv\x64\libmpv-2.dll" "$p\libmpv\x64"
 Copy-Item "$src\player\libmpv\arm64\libmpv-2.dll" "$p\libmpv\arm64"
 Copy-Item "$src\player\launcher\oranix-player.ico", "$src\player\LICENSE.libmpv.GPL" $p

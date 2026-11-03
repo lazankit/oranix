@@ -51,6 +51,7 @@ All downloads are on the **[latest release](https://github.com/lazankit/oranix/r
 
 ### Oranix Player (Windows; Linux as an mpv setup)
 - **Clay + glass look** in Oranix orange and charcoal, Poppins type, its own start screen.
+- **Subtitles from the internet** (OpenSubtitles, matched to your exact file), **sync to audio** (alass) and a **style menu** with readable fonts — Atkinson Hyperlegible, OpenDyslexic, Lexend.
 - **Audio & Subtitles popup** — English listed first, one click to switch. **C** turns subtitles on/off (remembers your pick).
 - **Quality & speed popup**, **−10 s / +10 s**, previous/next episode, time remaining always visible.
 - **Touchpad gestures:** two-finger scroll on the left half = brightness, right half = volume (up to 200 %), sideways = seek.
@@ -82,8 +83,10 @@ Download from the **[latest release](https://github.com/lazankit/oranix/releases
 
 | Key | Action | Key | Action |
 |---|---|---|---|
-| Space / K | Play / pause | ← / → | −5 s / +5 s (Shift: 30 s) |
-| ↑ / ↓ | Volume | N / M | Brightness down / up |
+| Space | Tap: play / pause · hold: 2× · double-tap: normal speed | ← / → | −5 s / +5 s (Shift: 30 s) |
+| N / M | Speed −0.25× / +0.25× (0.25×–3.5×) | Shift+N / Shift+M | Brightness down / up |
+| ↑ / ↓ | Volume | Ctrl+S | Find subtitles online |
+| Ctrl+Y | Sync subtitles to the audio | Ctrl+T | Subtitle style & timing |
 | C | Subtitles on/off | S / A | Audio & subtitles popup |
 | X | Quality & speed | F / Enter | Fullscreen |
 | > / < | Next / previous episode | ? | All shortcuts |

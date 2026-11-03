@@ -20,3 +20,6 @@ linux/out/
 
 # libmpv (downloaded at build time, ~100 MB per CPU)
 player/libmpv/
+
+# Subtitle sync engine (downloaded at build time)
+player/alass/
