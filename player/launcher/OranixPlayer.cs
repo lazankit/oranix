@@ -12,6 +12,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Globalization;
+using System.Web.Script.Serialization;
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
 
 static class Mpv
 {
@@ -85,6 +89,12 @@ class OranixPlayer : Form
     FormWindowState beforeFullscreen;
     readonly System.Windows.Forms.Timer liveDebounce = new System.Windows.Forms.Timer { Interval = 700 };
 
+    // Library home screen (library\index.html in a WebView2 over the video), shown when nothing plays.
+    readonly WebView2 lib = new WebView2 { Dock = DockStyle.Fill, Visible = false, DefaultBackgroundColor = Color.FromArgb(20, 20, 20) };
+    readonly System.Windows.Forms.Timer historyTimer = new System.Windows.Forms.Timer { Interval = 2000 };
+    readonly JavaScriptSerializer json = new JavaScriptSerializer { MaxJsonLength = int.MaxValue };
+    bool libReady, scanning;
+
     [STAThread]
     static void Main(string[] args)
     {
@@ -112,8 +122,16 @@ class OranixPlayer : Form
             var dropped = (string[])e.Data.GetData(DataFormats.FileDrop);
             for (int i = 0; i < dropped.Length; i++) Mpv.Command(mpv, "loadfile", dropped[i], i == 0 ? "replace" : "append");
         };
-        Shown += (o, e) => Start(files.ToList(), null, false);
+        Controls.Add(lib);
+        lib.BringToFront();
+        Library.Load();
+        Library.Ffmpeg = Path.Combine(AppDir, "alass", "bin", "ffmpeg.exe");
+        Library.ThumbReady += key => { if (IsHandleCreated) BeginInvoke((Action)(() => SendThumb(key))); };
+        historyTimer.Tick += (o, e) => RecordProgress();
+        historyTimer.Start();
+        Shown += (o, e) => { InitLibrary(); Start(files.ToList(), null, false); };
         FormClosing += (o, e) => {
+            try { RecordProgress(); Library.SaveHistory(); } catch { }
             if (mpv == IntPtr.Zero || closing) return;
             e.Cancel = true;   // let mpv save the position and shut down first; the event loop closes us
             closing = true;
@@ -189,7 +207,7 @@ class OranixPlayer : Form
     {
         switch (name) {
             case "media-title": Text = string.IsNullOrEmpty(str) ? "Oranix Player" : str + " - Oranix Player"; break;
-            case "idle-active": if (flag) Text = "Oranix Player"; break;
+            case "idle-active": ShowLibrary(flag); break;
             case "window-minimized": if (flag) WindowState = FormWindowState.Minimized; break;
             case "window-maximized":
                 if (FormBorderStyle != FormBorderStyle.None) WindowState = flag ? FormWindowState.Maximized : FormWindowState.Normal;
@@ -206,6 +224,132 @@ class OranixPlayer : Form
                 }
                 break;
         }
+    }
+
+    // ---------- library ----------
+
+    async void InitLibrary()
+    {
+        string page = Path.Combine(AppDir, "library");
+        if (!Directory.Exists(page)) return;
+        try {
+            string arch = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "win-arm64" : "win-x64";
+            string loader = Path.Combine(AppDir, "runtimes", arch, "native");
+            if (File.Exists(Path.Combine(loader, "WebView2Loader.dll"))) CoreWebView2Environment.SetLoaderDllFolderPath(loader);
+            var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(Library.DataDir, "webview"));
+            await lib.EnsureCoreWebView2Async(env);
+        } catch (Exception) { return; }   // no WebView2 runtime: the player still works, just without the library
+        var cw = lib.CoreWebView2;
+        cw.Settings.AreDefaultContextMenusEnabled = false;
+        cw.Settings.AreDevToolsEnabled = false;
+        cw.Settings.IsZoomControlEnabled = false;
+        cw.Settings.IsStatusBarEnabled = false;
+        cw.SetVirtualHostNameToFolderMapping("oranix.library", page, CoreWebView2HostResourceAccessKind.Allow);
+        cw.SetVirtualHostNameToFolderMapping("oranix.thumbs", Library.ThumbDir, CoreWebView2HostResourceAccessKind.Allow);
+        cw.SetVirtualHostNameToFolderMapping("oranix.fonts", Path.Combine(ConfigDir, "fonts"), CoreWebView2HostResourceAccessKind.Allow);
+        cw.WebMessageReceived += OnLibraryMessage;
+        cw.Navigate("https://oranix.library/index.html");
+        // Live editing of the page: reload when library\ changes.
+        var w = new FileSystemWatcher(page) { EnableRaisingEvents = true, SynchronizingObject = this, NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName };
+        w.Changed += (o, e) => cw.Reload();
+        Rescan();
+    }
+
+    void ShowLibrary(bool show)
+    {
+        if (show) Text = "Oranix Player";
+        if (!libReady && show) { lib.Visible = lib.CoreWebView2 != null; return; }
+        lib.Visible = show;
+        if (show) { lib.BringToFront(); SendState(); lib.Focus(); Rescan(); }
+        else screen.Focus();
+    }
+
+    void Rescan()
+    {
+        if (scanning) return;
+        scanning = true;
+        ThreadPool.QueueUserWorkItem(_ => {
+            try { Library.Scan(); } catch { }
+            BeginInvoke((Action)(() => { scanning = false; SendState(); Library.StartThumbnails(); }));
+        });
+    }
+
+    void Post(object msg)
+    {
+        if (lib.CoreWebView2 == null || !libReady) return;
+        lib.CoreWebView2.PostWebMessageAsJson(msg as string ?? json.Serialize(msg));
+    }
+
+    void SendState() { if (libReady) Post(Library.StateJson()); }
+
+    void SendThumb(string key)
+    {
+        double d;
+        Library.Durations.TryGetValue(key, out d);
+        Post(new Dictionary<string, object> { { "type", "thumb" }, { "key", key }, { "dur", d } });
+    }
+
+    void Toast(string text) { Post(new Dictionary<string, object> { { "type", "toast" }, { "text", text } }); }
+
+    void OnLibraryMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+    {
+        Dictionary<string, object> m;
+        try { m = json.Deserialize<Dictionary<string, object>>(e.WebMessageAsJson); } catch { return; }
+        string cmd = m.ContainsKey("cmd") ? m["cmd"] as string : null;
+        string path = m.ContainsKey("path") ? m["path"] as string : null;
+        switch (cmd) {
+            case "ready":
+                libReady = true;
+                if (mpv != IntPtr.Zero && Mpv.Get(mpv, "idle-active") == "yes") ShowLibrary(true); else SendState();
+                break;
+            case "play": if (path != null) PlayFromLibrary(path); break;
+            case "rescan": Toast("Looking for new videos…"); Rescan(); break;
+            case "watched": Library.SetWatched(path, m.ContainsKey("value") && (bool)m["value"]); SendState(); break;
+            case "forget": Library.Forget(path); SendState(); break;
+            case "clearHistory": Library.ClearHistory(); SendState(); break;
+            case "removeFolder": Library.Folders.Remove(path); Library.SaveSettings(); Rescan(); break;
+            case "addFolder":
+                using (var dlg = new FolderBrowserDialog { Description = "Choose a folder with your series or movies", ShowNewFolderButton = false }) {
+                    if (dlg.ShowDialog(this) == DialogResult.OK && !Library.Folders.Contains(dlg.SelectedPath)) {
+                        Library.Folders.Add(dlg.SelectedPath); Library.SaveSettings(); Toast("Added " + dlg.SelectedPath); Rescan();
+                    }
+                }
+                break;
+            case "openFile":
+                using (var dlg = new OpenFileDialog { Title = "Open a video", Filter = "Videos|*.mkv;*.mp4;*.avi;*.webm;*.mov;*.m4v;*.wmv;*.ts;*.flv;*.mpg|All files|*.*" }) {
+                    if (dlg.ShowDialog(this) == DialogResult.OK) PlayFromLibrary(dlg.FileName);
+                }
+                break;
+        }
+    }
+
+    // Plays a file, resuming where it was left. For an episode the whole series becomes the playlist,
+    // so it continues into the next episode and Next/Previous work across seasons.
+    void PlayFromLibrary(string path)
+    {
+        if (mpv == IntPtr.Zero) return;
+        string start = Library.ResumeAt(path).ToString("0.###", CultureInfo.InvariantCulture);
+        Mpv.Command(mpv, "loadfile", path, "replace", "-1", "start=" + start);
+        var item = Library.Find(path);
+        if (item != null && item.kind == "episode") {
+            var eps = Library.ShowEpisodes(item.showId);
+            int at = eps.FindIndex(x => string.Equals(x.path, path, StringComparison.OrdinalIgnoreCase));
+            for (int i = 0; i < at; i++) Mpv.Command(mpv, "loadfile", eps[i].path, "insert-at", i.ToString(), "start=0");
+            for (int i = at + 1; i < eps.Count; i++) Mpv.Command(mpv, "loadfile", eps[i].path, "append", "-1", "start=" + Library.ResumeAt(eps[i].path).ToString("0.###", CultureInfo.InvariantCulture));
+        }
+        ShowLibrary(false);
+    }
+
+    // History: sample the playing file's position every 2 s.
+    void RecordProgress()
+    {
+        if (mpv == IntPtr.Zero || lib.Visible) return;
+        string path = Mpv.Get(mpv, "path");
+        double pos, dur;
+        if (path == null || !double.TryParse(Mpv.Get(mpv, "time-pos") ?? "", NumberStyles.Float, CultureInfo.InvariantCulture, out pos)
+            || !double.TryParse(Mpv.Get(mpv, "duration") ?? "", NumberStyles.Float, CultureInfo.InvariantCulture, out dur)) return;
+        if (!path.Contains("://")) path = Path.GetFullPath(path);
+        Library.Record(path, pos, dur);
     }
 
     // Live editing: a change anywhere in config\ reloads the player on the same video at the same second.

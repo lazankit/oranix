@@ -1,8 +1,8 @@
-; Oranix installer (Inno Setup 6). Build with ..\build.ps1 -Installer
+﻿; Oranix installer (Inno Setup 6). Build with ..\build.ps1 -Installer
 ; Installs Oranix Player + Oranix Web for the current user (no admin needed), with Start menu entries,
 ; video file registration, and an uninstaller in Settings > Apps.
 
-#define AppVersion "1.3.0"
+#define AppVersion "1.4.0"
 
 [Setup]
 AppId={{6B1E8F3A-2C4D-4E7A-9B5F-3A8D1C2E7F90}

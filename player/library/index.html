@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Oranix Library</title>
+<style>
+@font-face { font-family: Poppins; src: url(https://oranix.fonts/Poppins-Regular.ttf); font-weight: 400; }
+@font-face { font-family: Poppins; src: url(https://oranix.fonts/Poppins-SemiBold.ttf); font-weight: 600; }
+@font-face { font-family: Poppins; src: url(https://oranix.fonts/Poppins-Bold.ttf); font-weight: 700; }
+:root { --bg: #141414; --panel: #1f1f1f; --line: rgba(255,255,255,.08); --text: #f2f2f2; --dim: #a3a3a3; --faint: #6b6b6b;
+  --accent: #ff7a00; --accent2: #ffa94d; --pad: clamp(20px, 4vw, 56px); --card: clamp(220px, 19vw, 300px); }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 Poppins, "Segoe UI", sans-serif; overflow-x: hidden; }
+body { user-select: none; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+::-webkit-scrollbar { width: 10px; height: 0; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+
+/* top bar */
+nav { position: fixed; inset: 0 0 auto 0; z-index: 20; display: flex; align-items: center; gap: 28px; padding: 14px var(--pad);
+  background: linear-gradient(rgba(0,0,0,.75), transparent); transition: background .25s; }
+nav.solid { background: rgba(20,20,20,.96); box-shadow: 0 1px 0 var(--line); }
+.logo { font-weight: 700; font-size: 24px; letter-spacing: -.3px; display: flex; align-items: center; gap: 10px; }
+.logo b { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent2), #f25c00); display: grid; place-items: center; }
+.logo b::after { content: ""; border-left: 11px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent; margin-left: 3px; }
+.logo i { color: var(--accent); font-style: normal; }
+.tabs { display: flex; gap: 22px; }
+.tabs button { color: var(--dim); font-size: 15px; padding: 4px 0; transition: color .15s; }
+.tabs button:hover { color: #fff; }
+.tabs button.on { color: #fff; font-weight: 600; }
+.sp { flex: 1; }
+.search { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 6px 14px; width: 260px; transition: border-color .15s; }
+.search:focus-within { border-color: var(--accent); }
+.search input { flex: 1; background: none; border: 0; outline: 0; color: #fff; font: inherit; font-size: 14px; }
+.search svg { width: 16px; height: 16px; fill: var(--dim); }
+.icon-btn { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; transition: background .15s; }
+.icon-btn:hover { background: rgba(255,255,255,.12); }
+.icon-btn svg { width: 20px; height: 20px; fill: #fff; }
+
+/* hero */
+.hero { position: relative; height: min(78vh, 720px); min-height: 440px; display: flex; align-items: flex-end; padding: 0 var(--pad) 12vh; overflow: hidden; }
+.hero .bg { position: absolute; inset: 0; background: #222 center/cover no-repeat; transform: scale(1.04); animation: drift 30s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: scale(1.1) translateX(-1.5%); } }
+.hero::after { content: ""; position: absolute; inset: 0; background:
+  linear-gradient(90deg, rgba(20,20,20,.95) 0%, rgba(20,20,20,.6) 38%, rgba(20,20,20,0) 70%),
+  linear-gradient(0deg, var(--bg) 0%, rgba(20,20,20,0) 35%); }
+.hero .info { position: relative; z-index: 1; max-width: 640px; }
+.kicker { color: var(--accent); font-weight: 600; letter-spacing: 3px; font-size: 12px; text-transform: uppercase; }
+.hero h1 { font-size: clamp(40px, 6vw, 76px); line-height: 1.02; margin: 10px 0 14px; letter-spacing: -1.5px; font-weight: 700; text-shadow: 0 4px 30px rgba(0,0,0,.5); }
+.hero .meta { color: #ddd; font-size: 16px; margin-bottom: 16px; }
+.hero .meta b { color: #fff; }
+.bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,.25); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); }
+.hero .bar { width: 320px; margin-bottom: 22px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 26px; border-radius: 8px; font-weight: 600; font-size: 16px; transition: transform .1s, background .15s; }
+.btn:active { transform: scale(.97); }
+.btn svg { width: 22px; height: 22px; fill: currentColor; }
+.btn.primary { background: #fff; color: #111; }
+.btn.primary:hover { background: #e6e6e6; }
+.btn.ghost { background: rgba(110,110,110,.55); color: #fff; }
+.btn.ghost:hover { background: rgba(110,110,110,.4); }
+.btn.accent { background: var(--accent); color: #fff; }
+.btn.accent:hover { background: #ff8f26; }
+
+/* rows */
+main { position: relative; z-index: 2; margin-top: -9vh; padding-bottom: 60px; }
+.page { padding-top: 90px; }
+.row { margin: 0 0 34px; }
+.row h2 { margin: 0 var(--pad) 10px; font-size: 20px; font-weight: 600; display: flex; align-items: baseline; gap: 12px; }
+.row h2 small { color: var(--faint); font-weight: 400; font-size: 13px; }
+.track-wrap { position: relative; }
+.track { display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth; padding: 8px var(--pad) 18px; scroll-padding: 0 var(--pad); }
+.arrow { position: absolute; top: 8px; bottom: 18px; width: var(--pad); z-index: 5; display: grid; place-items: center; opacity: 0; transition: opacity .15s;
+  background: rgba(20,20,20,.55); }
+.arrow svg { width: 34px; height: 34px; fill: #fff; }
+.arrow.l { left: 0; } .arrow.r { right: 0; }
+.track-wrap:hover .arrow { opacity: 1; }
+.arrow:hover svg { transform: scale(1.2); }
+
+.card { flex: 0 0 var(--card); cursor: pointer; border-radius: 8px; position: relative; transition: transform .2s ease, z-index 0s .2s; outline: none; }
+.card:hover, .card:focus-visible { transform: scale(1.06); z-index: 3; transition: transform .2s ease; }
+.art { aspect-ratio: 16/9; border-radius: 8px; background: linear-gradient(135deg, #2c2420, #1b1b1b) center/cover no-repeat; position: relative; overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+.art .ph { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 22px; color: rgba(255,255,255,.75); padding: 12px; text-align: center; }
+.art.has .ph { display: none; }
+.art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.75), rgba(0,0,0,0) 55%); }
+.art .name { position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 1; font-weight: 700; font-size: 18px; line-height: 1.15; text-shadow: 0 2px 8px rgba(0,0,0,.7); }
+.art .play { position: absolute; z-index: 1; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px; border-radius: 50%; background: rgba(0,0,0,.45);
+  border: 2px solid #fff; display: grid; place-items: center; opacity: 0; transform: scale(.85); transition: .18s; }
+.art .play svg { width: 26px; height: 26px; fill: #fff; margin-left: 3px; }
+.card:hover .play, .card:focus-visible .play { opacity: 1; transform: scale(1); }
+.art .bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; border-radius: 0; height: 4px; }
+.art .badge { position: absolute; top: 8px; right: 8px; z-index: 1; background: rgba(0,0,0,.6); border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 600; }
+.art .badge.done { background: var(--accent); }
+.card .t { margin-top: 8px; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .s { color: var(--dim); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* grids (search, movies) */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card), 1fr)); gap: 26px 12px; padding: 8px var(--pad); }
+.grid .card { flex: none; }
+.title-row { display: flex; align-items: center; gap: 16px; padding: 0 var(--pad) 18px; }
+.title-row h1 { margin: 0; font-size: 32px; font-weight: 700; }
+
+/* series page */
+.show .hero { height: min(62vh, 560px); padding-bottom: 7vh; }
+.show .hero h1 { font-size: clamp(38px, 5vw, 64px); }
+.show { position: relative; }
+.back { position: absolute; top: 84px; left: var(--pad); z-index: 15; }
+.back.icon-btn { background: rgba(0,0,0,.5); width: 42px; height: 42px; }
+.seasons { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 var(--pad) 18px; }
+.seasons button { padding: 7px 16px; border-radius: 999px; background: rgba(255,255,255,.08); color: var(--dim); font-weight: 600; font-size: 14px; transition: .15s; }
+.seasons button:hover { background: rgba(255,255,255,.16); color: #fff; }
+.seasons button.on { background: #fff; color: #111; }
+.eps { padding: 0 var(--pad); max-width: 1180px; }
+.ep { display: grid; grid-template-columns: 34px 220px 1fr auto; gap: 22px; align-items: center; padding: 16px 18px; border-radius: 10px; border-bottom: 1px solid var(--line); cursor: pointer; transition: background .15s; }
+.ep:hover, .ep:focus-visible { background: rgba(255,255,255,.06); outline: none; }
+.ep.next { background: rgba(255,122,0,.08); box-shadow: inset 3px 0 0 var(--accent); }
+.ep .n { font-size: 24px; color: var(--dim); text-align: center; }
+.ep .art { width: 220px; }
+.ep .play { opacity: 0; }
+.ep:hover .play { opacity: 1; transform: scale(1); }
+.ep h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+.ep p { margin: 0; color: var(--dim); font-size: 13px; }
+.ep .tick { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); display: grid; place-items: center; color: transparent; transition: .15s; }
+.ep .tick:hover { border-color: #fff; }
+.ep .tick.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ep .tick svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* history */
+.day { padding: 0 var(--pad); max-width: 1100px; }
+.day h3 { color: var(--dim); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; margin: 26px 0 8px; }
+.hrow { display: grid; grid-template-columns: 180px 1fr auto auto; gap: 18px; align-items: center; padding: 10px 14px; border-radius: 10px; cursor: pointer; }
+.hrow:hover { background: rgba(255,255,255,.06); }
+.hrow .art { width: 180px; }
+.hrow .when { color: var(--faint); font-size: 13px; }
+.hrow .x { color: var(--faint); width: 32px; height: 32px; border-radius: 50%; }
+.hrow .x:hover { color: #fff; background: rgba(255,255,255,.1); }
+.missing { opacity: .45; }
+
+.empty { text-align: center; padding: 22vh 20px; color: var(--dim); }
+.empty h1 { color: #fff; font-size: 30px; margin: 0 0 10px; }
+.folders { padding: 0 var(--pad); max-width: 900px; }
+.folder { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 10px; background: var(--panel); margin-bottom: 8px; }
+.folder span { flex: 1; color: #ddd; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); background: #2a2a2a; padding: 10px 20px; border-radius: 10px; opacity: 0; transition: .2s; z-index: 50; }
+.toast.on { opacity: 1; transform: translateX(-50%); }
+.fade { animation: fade .25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+</style>
+</head>
+<body>
+<nav id="nav">
+  <div class="logo"><b></b><span>Oran<i>ix</i></span></div>
+  <div class="tabs">
+    <button data-go="home">Home</button>
+    <button data-go="series">Series</button>
+    <button data-go="movies">Movies</button>
+    <button data-go="history">History</button>
+    <button data-go="folders">Folders</button>
+  </div>
+  <div class="sp"></div>
+  <label class="search"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <input id="q" placeholder="Search titles, episodes" autocomplete="off"></label>
+  <button class="icon-btn" title="Open a file (Ctrl+O)" data-cmd="openFile"><svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm0 12H4V8h16v10z"/></svg></button>
+  <button class="icon-btn" title="Rescan folders" data-cmd="rescan"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+</nav>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ICON = {
+  play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+  info: '<svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',
+  back: '<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>',
+  left: '<svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>',
+  right: '<svg viewBox="0 0 24 24"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>',
+  x: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>',
+};
+let S = { series: [], movies: [], other: [], history: {}, durations: {}, thumbs: new Set(), folders: [] };
+let view = { page: 'home' };
+const app = document.getElementById('app');
+const post = m => window.chrome && chrome.webview && chrome.webview.postMessage(m);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const pad = n => String(n).padStart(2, '0');
+const thumb = k => S.thumbs.has(k) ? `url('https://oranix.thumbs/${k}.jpg')` : '';
+const H = p => S.history[p];
+const dur = it => S.durations[it.key] || (H(it.path) && H(it.path).dur) || 0;
+const progress = it => { const h = H(it.path); if (!h) return 0; if (h.watched) return 1; const d = h.dur || dur(it); return d ? Math.min(1, h.pos / d) : 0; };
+const mins = s => s >= 3600 ? `${Math.floor(s / 3600)}h ${Math.round(s % 3600 / 60)}m` : `${Math.max(1, Math.round(s / 60))}m`;
+const code = e => `S${pad(e.s)}E${pad(e.e)}`;
+const epTitle = e => e.title || `Episode ${e.e}`;
+
+function allEps(sh) { return sh.seasons.flatMap(s => s.eps); }
+function lastActivity(paths) { let t = 0; for (const p of paths) { const h = H(p); if (h && h.updated > t) t = h.updated; } return t; }
+// What to watch next in a series: the episode in progress, or the one after the last finished.
+function nextUp(sh) {
+  const eps = allEps(sh); let best = -1, t = 0;
+  eps.forEach((e, i) => { const h = H(e.path); if (h && h.updated > t) { t = h.updated; best = i; } });
+  if (best < 0) return { ep: eps[0], fresh: true };
+  const h = H(eps[best].path);
+  if (!h.watched) return { ep: eps[best], resume: true };
+  for (let i = best + 1; i < eps.length; i++) if (!(H(eps[i].path) || {}).watched) return { ep: eps[i] };
+  return { ep: eps[best], done: true };
+}
+function watchedCount(sh) { return allEps(sh).filter(e => (H(e.path) || {}).watched).length; }
+
+function art(key, inner, cls = '') {
+  const bg = thumb(key);
+  return `<div class="art ${bg ? 'has' : ''} ${cls}" data-key="${key}" style="${bg ? `background-image:${bg}` : ''}">${inner}</div>`;
+}
+function bar(p) { return p > 0 && p < 1 ? `<div class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>` : ''; }
+function playIcon() { return `<div class="play">${ICON.play}</div>`; }
+
+function epCard(sh, e, sub) {
+  const p = progress(e), h = H(e.path), d = dur(e);
+  const left = h && !h.watched && d ? `${mins(d - h.pos)} left` : (d ? mins(d) : '');
+  return `<div class="card" tabindex="0" data-play="${esc(e.path)}">
+    ${art(e.key, `<div class="ph">${esc(sh.name)}</div>${playIcon()}${bar(p)}${p >= 1 ? `<span class="badge done">Watched</span>` : ''}`)}
+    <div class="t">${esc(sh.name)} · ${code(e)}</div><div class="s">${esc(sub || [epTitle(e), left].filter(Boolean).join(' · '))}</div></div>`;
+}
+function showCard(sh) {
+  const n = allEps(sh).length, w = watchedCount(sh), seasons = sh.seasons.length;
+  return `<div class="card" tabindex="0" data-show="${esc(sh.id)}">
+    ${art(sh.backdrop, `<div class="ph"></div><div class="name">${esc(sh.name)}</div>${playIcon()}${bar(w / n)}${w === n && n ? `<span class="badge done">Finished</span>` : ''}`)}
+    <div class="t">${esc(sh.name)}</div><div class="s">${seasons} season${seasons > 1 ? 's' : ''} · ${n} episodes${w ? ` · ${w} watched` : ''}</div></div>`;
+}
+function fileCard(it, kind) {
+  const p = progress(it), h = H(it.path), d = dur(it);
+  const label = kind === 'movie' ? `${it.year || ''}${d ? ' · ' + mins(d) : ''}` : (h && !h.watched && d ? `${mins(d - h.pos)} left` : (d ? mins(d) : ''));
+  return `<div class="card" tabindex="0" data-play="${esc(it.path)}">
+    ${art(it.key, `<div class="ph">${esc(it.title)}</div>${playIcon()}${bar(p)}${p >= 1 ? `<span class="badge done">Watched</span>` : ''}`)}
+    <div class="t">${esc(it.title)}</div><div class="s">${esc(label)}</div></div>`;
+}
+function row(title, cards, note) {
+  if (!cards.length) return '';
+  return `<section class="row fade"><h2>${esc(title)}${note ? ` <small>${esc(note)}</small>` : ''}</h2><div class="track-wrap">
+    <button class="arrow l" data-scroll="-1">${ICON.left}</button><div class="track">${cards.join('')}</div><button class="arrow r" data-scroll="1">${ICON.right}</button></div></section>`;
+}
+
+// ---------- pages ----------
+function continueList() {
+  const out = [];
+  for (const sh of S.series) {
+    const t = lastActivity(allEps(sh).map(e => e.path)); if (!t) continue;
+    const nu = nextUp(sh); if (nu.done) continue;
+    out.push({ t, html: epCard(sh, nu.ep, nu.resume ? null : `Up next · ${epTitle(nu.ep)}`), sh, nu });
+  }
+  for (const it of [...S.movies, ...S.other]) {
+    const h = H(it.path); if (!h || h.watched || h.pos < 30) continue;
+    out.push({ t: h.updated, html: fileCard(it, S.movies.includes(it) ? 'movie' : 'other'), it });
+  }
+  return out.sort((a, b) => b.t - a.t);
+}
+
+function hero() {
+  const cont = continueList();
+  const pick = cont.find(c => c.sh) || (S.series[0] && { sh: S.series[0], nu: nextUp(S.series[0]) }) || null;
+  if (!pick) {
+    const m = (cont[0] && cont[0].it) || S.movies[0];
+    if (!m) return '';
+    return heroHtml({ bg: m.key, kicker: 'Movie', title: m.title, meta: m.year || '', p: progress(m), playPath: m.path, playLabel: progress(m) > 0 ? 'Resume' : 'Play' });
+  }
+  const { sh, nu } = pick, e = nu.ep, h = H(e.path), d = dur(e);
+  const meta = `<b>${code(e)}</b> · ${esc(epTitle(e))}${h && !h.watched && d ? ` · ${mins(d - h.pos)} left` : ''}`;
+  return heroHtml({ bg: sh.backdrop, kicker: nu.fresh ? 'Series' : 'Continue watching', title: sh.name, meta, p: progress(e),
+    playPath: e.path, playLabel: nu.resume ? 'Resume' : nu.fresh ? 'Play' : `Play ${code(e)}`, show: sh.id });
+}
+function heroHtml(o) {
+  const bg = thumb(o.bg);
+  return `<header class="hero"><div class="bg" data-key="${o.bg}" data-bg style="${bg ? `background-image:${bg}` : ''}"></div><div class="info fade">
+    <div class="kicker">${esc(o.kicker)}</div><h1>${esc(o.title)}</h1><div class="meta">${o.meta}</div>${o.p > 0 && o.p < 1 ? bar(o.p) : ''}
+    <div class="actions"><button class="btn primary" data-play="${esc(o.playPath)}">${ICON.play}${esc(o.playLabel)}</button>
+    ${o.show ? `<button class="btn ghost" data-show="${esc(o.show)}">${ICON.info}Episodes</button>` : ''}</div></div></header>`;
+}
+
+function pageHome() {
+  if (!S.series.length && !S.movies.length && !S.other.length) return pageEmpty();
+  const cont = continueList();
+  const series = [...S.series].sort((a, b) => lastActivity(allEps(b).map(e => e.path)) - lastActivity(allEps(a).map(e => e.path)) || a.name.localeCompare(b.name));
+  const recent = [];
+  for (const sh of S.series) for (const e of allEps(sh)) recent.push({ added: e.added, html: epCard(sh, e) });
+  for (const m of S.movies) recent.push({ added: m.added, html: fileCard(m, 'movie') });
+  recent.sort((a, b) => b.added - a.added);
+  return hero() + `<main>
+    ${row('Continue watching', cont.map(c => c.html))}
+    ${row('Your series', series.map(showCard), `${S.series.length}`)}
+    ${row('Movies', S.movies.map(m => fileCard(m, 'movie')))}
+    ${row('Recently added', recent.slice(0, 20).map(r => r.html))}
+    ${row('Other videos', S.other.map(o => fileCard(o, 'other')))}
+  </main>`;
+}
+
+function pageSeries() {
+  return `<div class="page fade"><div class="title-row"><h1>Series</h1></div><div class="grid">${S.series.map(showCard).join('') || '<p class="s">No series found yet.</p>'}</div></div>`;
+}
+function pageMovies() {
+  const all = [...S.movies.map(m => fileCard(m, 'movie')), ...S.other.map(o => fileCard(o, 'other'))];
+  return `<div class="page fade"><div class="title-row"><h1>Movies &amp; videos</h1></div><div class="grid">${all.join('') || '<p class="s">No movies found yet.</p>'}</div></div>`;
+}
+
+function pageShow() {
+  const sh = S.series.find(s => s.id === view.show); if (!sh) { view = { page: 'home' }; return pageHome(); }
+  const nu = nextUp(sh), e = nu.ep;
+  const season = view.season || e.s;
+  const s = sh.seasons.find(x => x.n === season) || sh.seasons[0];
+  const n = allEps(sh).length, w = watchedCount(sh);
+  const label = nu.resume ? `Resume ${code(e)}` : nu.done ? 'Watch again' : nu.fresh ? 'Play S01E01'.replace('S01E01', code(e)) : `Play ${code(e)}`;
+  const bg = thumb(sh.backdrop);
+  return `<div class="show fade"><button class="back icon-btn" data-go="home" title="Back">${ICON.back}</button>
+  <header class="hero"><div class="bg" data-key="${sh.backdrop}" data-bg style="${bg ? `background-image:${bg}` : ''}"></div><div class="info">
+    <div class="kicker">Series</div><h1>${esc(sh.name)}</h1>
+    <div class="meta">${sh.seasons.length} season${sh.seasons.length > 1 ? 's' : ''} · ${n} episodes · <b>${w}</b> watched</div>${w > 0 && w < n ? `<div class="bar" style="width:320px;margin-bottom:22px"><i style="width:${w / n * 100}%"></i></div>` : ''}
+    <div class="actions"><button class="btn primary" data-play="${esc(nu.done ? allEps(sh)[0].path : e.path)}">${ICON.play}${label}</button></div></div></header>
+  <main style="margin-top:-4vh">
+    <div class="seasons">${sh.seasons.map(x => `<button class="${x.n === s.n ? 'on' : ''}" data-season="${x.n}">Season ${x.n}</button>`).join('')}</div>
+    <div class="eps">${s.eps.map(ep => {
+      const h = H(ep.path), d = dur(ep), p = progress(ep), isNext = ep.path === e.path && !nu.done;
+      const info = [d ? mins(d) : '', h && !h.watched && h.pos > 30 && d ? `${mins(d - h.pos)} left` : '', h && h.watched ? 'Watched' : ''].filter(Boolean).join(' · ');
+      return `<div class="ep ${isNext ? 'next' : ''}" tabindex="0" data-play="${esc(ep.path)}"><div class="n">${ep.e}</div>
+        ${art(ep.key, `<div class="ph">${code(ep)}</div>${playIcon()}${bar(p)}`)}
+        <div><h3>${esc(epTitle(ep))}</h3><p>${code(ep)}${info ? ' · ' + esc(info) : ''}</p></div>
+        <button class="tick ${h && h.watched ? 'on' : ''}" title="${h && h.watched ? 'Mark as unwatched' : 'Mark as watched'}" data-watched="${esc(ep.path)}" data-to="${h && h.watched ? 0 : 1}">${ICON.check}</button></div>`;
+    }).join('')}</div>
+  </main></div>`;
+}
+
+function itemFor(path) {
+  for (const sh of S.series) for (const e of allEps(sh)) if (e.path === path) return { kind: 'ep', sh, e };
+  for (const m of S.movies) if (m.path === path) return { kind: 'movie', it: m };
+  for (const o of S.other) if (o.path === path) return { kind: 'other', it: o };
+  return null;
+}
+function pageHistory() {
+  const entries = Object.entries(S.history).sort((a, b) => b[1].updated - a[1].updated);
+  if (!entries.length) return `<div class="page fade"><div class="title-row"><h1>History</h1></div><div class="empty" style="padding:12vh 20px"><h1>Nothing watched yet</h1><p>Everything you play shows up here.</p></div></div>`;
+  const groups = new Map(), today = new Date(); today.setHours(0, 0, 0, 0);
+  for (const [path, h] of entries) {
+    const d = new Date(h.updated), day = new Date(d); day.setHours(0, 0, 0, 0);
+    const diff = Math.round((today - day) / 864e5);
+    const label = diff === 0 ? 'Today' : diff === 1 ? 'Yesterday' : d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: today.getFullYear() === d.getFullYear() ? undefined : 'numeric' });
+    if (!groups.has(label)) groups.set(label, []);
+    groups.get(label).push([path, h, d]);
+  }
+  let html = `<div class="page fade"><div class="title-row"><h1>History</h1><div class="sp"></div><button class="btn ghost" data-cmd="clearHistory">Clear history</button></div>`;
+  for (const [label, list] of groups) {
+    html += `<div class="day"><h3>${esc(label)}</h3>`;
+    for (const [path, h, d] of list) {
+      const f = itemFor(path), name = path.split(/[\\/]/).pop();
+      const key = f ? (f.e || f.it).key : '';
+      const title = f ? (f.kind === 'ep' ? `${f.sh.name} · ${code(f.e)}` : f.it.title) : name;
+      const sub = f ? (f.kind === 'ep' ? epTitle(f.e) : '') : 'File not in your library folders';
+      const status = h.watched ? 'Watched' : h.dur ? `${Math.round(h.pos / h.dur * 100)}% · ${mins(h.dur - h.pos)} left` : '';
+      html += `<div class="hrow ${f ? '' : 'missing'}" data-play="${esc(path)}">${art(key, `<div class="ph">${esc(title.slice(0, 18))}</div>${bar(h.watched ? 1 : h.dur ? h.pos / h.dur : 0)}`)}
+        <div><div class="t" style="font-weight:600">${esc(title)}</div><div class="s" style="color:var(--dim);font-size:13px">${esc([sub, status].filter(Boolean).join(' · '))}</div></div>
+        <div class="when">${d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</div>
+        <button class="x" title="Remove from history" data-forget="${esc(path)}">${ICON.x}</button></div>`;
+    }
+    html += `</div>`;
+  }
+  return html + `</div>`;
+}
+
+function pageFolders() {
+  return `<div class="page fade"><div class="title-row"><h1>Library folders</h1><div class="sp"></div><button class="btn accent" data-cmd="addFolder">${ICON.plus}Add folder</button></div>
+    <div class="folders"><p class="s" style="color:var(--dim);margin:0 0 16px">Oranix looks in these folders (and the folders inside them) for series and movies. Episodes named like <b>S01E05</b> are grouped into series and seasons.</p>
+    ${S.folders.map(f => `<div class="folder"><span>${esc(f)}</span><button class="x icon-btn" title="Remove" data-unfolder="${esc(f)}">${ICON.x}</button></div>`).join('')}</div></div>`;
+}
+function pageEmpty() {
+  return `<div class="empty fade"><h1>Your library is empty</h1><p>Add a folder that has your series or movies.</p><p style="margin-top:22px"><button class="btn accent" data-cmd="addFolder">${ICON.plus}Add folder</button></p></div>`;
+}
+function pageSearch(q) {
+  const t = q.toLowerCase(), cards = [];
+  for (const sh of S.series) {
+    if (sh.name.toLowerCase().includes(t)) cards.push(showCard(sh));
+    for (const e of allEps(sh)) if ((e.title || '').toLowerCase().includes(t) || code(e).toLowerCase() === t) cards.push(epCard(sh, e));
+  }
+  for (const m of S.movies) if (m.title.toLowerCase().includes(t)) cards.push(fileCard(m, 'movie'));
+  for (const o of S.other) if (o.title.toLowerCase().includes(t)) cards.push(fileCard(o, 'other'));
+  return `<div class="page fade"><div class="title-row"><h1>Results for “${esc(q)}”</h1></div><div class="grid">${cards.join('') || '<p class="s" style="color:var(--dim)">Nothing matches.</p>'}</div></div>`;
+}
+
+// ---------- render & events ----------
+function render(keepScroll) {
+  const y = window.scrollY, q = document.getElementById('q').value.trim();
+  const pages = { home: pageHome, series: pageSeries, movies: pageMovies, history: pageHistory, folders: pageFolders, show: pageShow };
+  app.innerHTML = q ? pageSearch(q) : (pages[view.page] || pageHome)();
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', !q && b.dataset.go === (view.page === 'show' ? 'series' : view.page)));
+  window.scrollTo(0, keepScroll ? y : 0);
+}
+function go(page, extra) { view = Object.assign({ page }, extra || {}); document.getElementById('q').value = ''; render(); }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-play],[data-show],[data-go],[data-cmd],[data-season],[data-watched],[data-forget],[data-unfolder],[data-scroll]');
+  if (!t) return;
+  e.stopPropagation();
+  const d = t.dataset;
+  if (d.watched) { post({ cmd: 'watched', path: d.watched, value: d.to === '1' }); return; }
+  if (d.forget) { post({ cmd: 'forget', path: d.forget }); return; }
+  if (d.unfolder) { post({ cmd: 'removeFolder', path: d.unfolder }); return; }
+  if (d.scroll) { const tr = t.parentElement.querySelector('.track'); tr.scrollBy({ left: d.scroll * tr.clientWidth * 0.85 }); return; }
+  if (d.season) { view.season = +d.season; render(true); return; }
+  if (d.show) { go('show', { show: d.show }); return; }
+  if (d.go) { go(d.go); return; }
+  if (d.cmd) { if (d.cmd === 'clearHistory' && !t.dataset.sure) { t.dataset.sure = 1; t.textContent = 'Click again to clear'; return; } post({ cmd: d.cmd }); return; }
+  if (d.play) post({ cmd: 'play', path: d.play });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement && document.activeElement.matches('.card,.ep')) document.activeElement.click();
+  if (e.key === '/' && document.activeElement.id !== 'q') { e.preventDefault(); document.getElementById('q').focus(); }
+  if (e.key === 'Escape') { if (document.getElementById('q').value) { document.getElementById('q').value = ''; render(); } else if (view.page !== 'home') go('home'); }
+  if (e.ctrlKey && e.key.toLowerCase() === 'o') { e.preventDefault(); post({ cmd: 'openFile' }); }
+});
+document.getElementById('q').addEventListener('input', () => render());
+window.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('solid', window.scrollY > 40), { passive: true });
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+let toastT;
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2200); }
+
+if (window.chrome && chrome.webview) chrome.webview.addEventListener('message', ev => {
+  const m = ev.data;
+  if (m.type === 'state') {
+    S = Object.assign(m, { thumbs: new Set(m.thumbs) });
+    render(true);
+  } else if (m.type === 'thumb') {
+    S.thumbs.add(m.key); if (m.dur) S.durations[m.key] = m.dur;
+    document.querySelectorAll(`[data-key="${m.key}"]`).forEach(el => { el.style.backgroundImage = thumb(m.key); el.classList.add('has'); });
+  } else if (m.type === 'toast') toast(m.text);
+  else if (m.type === 'refresh') render(true);
+});
+render();
+post({ cmd: 'ready' });
+</script>
+</body>
+</html>

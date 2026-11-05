@@ -30,20 +30,8 @@ if (!(Test-Path "$src\player\alass\bin\alass-cli.exe")) {
   # alass finds ffmpeg/ffprobe next to itself, so the player needs no environment setup to run it.
   Copy-Item "$src\player\alass\ffmpeg\bin\*" "$src\player\alass\bin"
 }
-$p = "$dist\Player"
-Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force "$p\libmpv\x64", "$p\libmpv\arm64" | Out-Null
-robocopy "$src\player\config" "$p\config" /MIR /NFL /NDL /NJH /NJS | Out-Null
-robocopy "$src\player\alass" "$p\alass" /E /NFL /NDL /NJH /NJS | Out-Null
-Copy-Item "$src\player\libmpv\x64\libmpv-2.dll" "$p\libmpv\x64"
-Copy-Item "$src\player\libmpv\arm64\libmpv-2.dll" "$p\libmpv\arm64"
-Copy-Item "$src\player\launcher\oranix-player.ico", "$src\player\LICENSE.libmpv.GPL" $p
-& $csc @common "/win32icon:$src\player\launcher\oranix-player.ico" "/out:$p\Oranix Player.exe" `
-  /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:System.Web.Extensions.dll "$src\player\launcher\OranixPlayer.cs"
-if ($LASTEXITCODE) { throw 'Oranix Player build failed' }
-
-# Oranix Web: browser + live files. The WebView2 SDK (Microsoft) is downloaded from NuGet on first build,
-# with the native loader for both x64 and ARM64.
+# WebView2 SDK (Microsoft) for Oranix Web and the Oranix Player library, downloaded from NuGet on first
+# build, with the native loader for both x64 and ARM64.
 $sdk = "$src\web\sdk"
 if (!(Test-Path "$sdk\runtimes\win-arm64\native\WebView2Loader.dll")) {
   $nupkg = "$env:TEMP\webview2-sdk.zip"
@@ -56,6 +44,22 @@ if (!(Test-Path "$sdk\runtimes\win-arm64\native\WebView2Loader.dll")) {
     Copy-Item "$env:TEMP\webview2-sdk\runtimes\win-$arch\native\WebView2Loader.dll" "$sdk\runtimes\win-$arch\native"
   }
 }
+$p = "$dist\Player"
+Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force "$p\libmpv\x64", "$p\libmpv\arm64" | Out-Null
+robocopy "$src\player\config" "$p\config" /MIR /NFL /NDL /NJH /NJS | Out-Null
+robocopy "$src\player\alass" "$p\alass" /E /NFL /NDL /NJH /NJS | Out-Null
+robocopy "$src\player\library" "$p\library" /MIR /NFL /NDL /NJH /NJS | Out-Null
+Copy-Item "$sdk\*" $p -Recurse -Force
+Copy-Item "$src\player\libmpv\x64\libmpv-2.dll" "$p\libmpv\x64"
+Copy-Item "$src\player\libmpv\arm64\libmpv-2.dll" "$p\libmpv\arm64"
+Copy-Item "$src\player\launcher\oranix-player.ico", "$src\player\LICENSE.libmpv.GPL" $p
+& $csc @common "/win32icon:$src\player\launcher\oranix-player.ico" "/out:$p\Oranix Player.exe" `
+  "/r:$p\Microsoft.Web.WebView2.Core.dll" "/r:$p\Microsoft.Web.WebView2.WinForms.dll" `
+  /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:System.Web.Extensions.dll "$src\player\launcher\OranixPlayer.cs" "$src\player\launcher\Library.cs"
+if ($LASTEXITCODE) { throw 'Oranix Player build failed' }
+
+# Oranix Web: browser + live files.
 $w = "$dist\Web"
 Remove-Item $w -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $w | Out-Null

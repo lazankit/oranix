@@ -67,3 +67,9 @@ local function on_space(e)
 end
 
 mp.add_key_binding(nil, "space", on_space, { complex = true })
+
+-- Back to the library (saves the position first, like quitting does)
+mp.add_key_binding(nil, "home", function()
+  mp.command("write-watch-later-config")
+  mp.commandv("stop")
+end)
