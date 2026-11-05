@@ -51,6 +51,7 @@ All downloads are on the **[latest release](https://github.com/lazankit/oranix/r
 
 ### Oranix Player (Windows; Linux as an mpv setup)
 - **Clay + glass look** in Oranix orange and charcoal, Poppins type, its own start screen.
+- **Netflix-style library**: your series grouped by season, Continue watching, episode thumbnails, watched marks and full history (Ctrl+L from a video).
 - **Subtitles from the internet** (OpenSubtitles, matched to your exact file), **sync to audio** (alass) and a **style menu** with readable fonts — Atkinson Hyperlegible, OpenDyslexic, Lexend.
 - **Audio & Subtitles popup** — English listed first, one click to switch. **C** turns subtitles on/off (remembers your pick).
 - **Quality & speed popup**, **−10 s / +10 s**, previous/next episode, time remaining always visible.
